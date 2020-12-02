@@ -1,0 +1,129 @@
+#include <iostream>
+#include <stdlib.h>
+
+struct processes
+{
+	int num;		//
+	int burst_time;		//settate a mano
+	int arrival_time;	//
+};
+
+void input(struct processes *array_progs, int num_progs); //prototipo di funzione per l'input
+void FCFScalc(struct processes *array_progs, int num_progs); //prototipo di funzione per il calcolo FCFS
+
+int main()
+{
+	std::cout<<"Quanti programmi vuoi inserire? ";
+	int num_progs;
+	std::cin>>num_progs;
+	
+	while(num_progs < 2)
+	{
+		std::cout<<"Devi inserire un numero maggiore di 1.\n";
+		std::cin>>num_progs;
+	}
+	
+	struct processes *array_progs = malloc(num_progs * sizeof(*array_progs)); //array di lunghezza arbitraria di struct per ogni processo
+	if(array_progs == NULL)
+	{
+		std::cout<<"Impossibile allocare risorse per l'esecuzione del programma.\n";
+		return 1;
+	}
+	
+	input(array_progs, num_progs); //funzione per l'input
+
+	FCFScalc(array_progs, num_progs); //svolge tutti i calcoli e manda in output i risultati
+
+	free(array_progs);
+	return 0;
+}
+
+void input(struct processes *array_progs, int num_progs)
+{
+	std::cout<<"L'arrival time deve partire da 0.\n\n";
+	for(int i=0; i<num_progs; i++) //ciclo che si ripete tante volte quante le struct nell'array
+	{
+		array_progs[i].num = i;					//setta il numero del processo
+		std::cout<<"Burst time per processo P"<<i<<": ";
+		std::cin>>array_progs[i].burst_time;	//input per burst time
+		
+		std::cout<<"Arrival time per processo P"<<i<<": ";
+		std::cin>>array_progs[i].arrival_time;	//input per arrival time
+	}
+}
+
+void FCFScalc(struct processes *array_progs, int num_progs)
+{
+	for(int i=0; i<(num_progs-1); i++) 						//bubble sort in base al tempo di arrivo
+		for(int j=0; j<(num_progs-i-1); j++)					//
+			if(array_progs[j].arrival_time > array_progs[j+1].arrival_time)	//
+			{								//
+				struct processes temp = array_progs[j];			//
+				array_progs[j] = array_progs[j+1];			//
+				array_progs[j+1] = temp;				//
+			}								//
+
+	std::cout<<"Processi:\t\t";			//
+	for(int i=0; i<num_progs; i++)			//
+		std::cout<<array_progs[i].num<<"\t";	//output numero processi
+	std::cout<<"\n";				//
+
+	std::cout<<"Burst time:\t\t";				//
+	for(int i=0; i<num_progs; i++)				//
+		std::cout<<array_progs[i].burst_time<<"\t";	//output burst time
+	std::cout<<"\n";						//
+
+	std::cout<<"Waiting time:\t\t"; //output tempo di attesa
+	int contatore_tempo=0; //tempo usato per esecuzione dei vari processi
+	int sommatoria_waitt=0; //sommatoria per la media
+	for(int i=0; i<num_progs; i++)
+	{
+		if(array_progs[i].arrival_time > contatore_tempo) //se il processo arriva dopo che tutti i processi piÃ¹ vecchi sono finiti
+		{
+			std::cout<<contatore_tempo+(array_progs[i].arrival_time - contatore_tempo)<<"\t";
+			sommatoria_waitt += contatore_tempo+(array_progs[i].arrival_time - contatore_tempo);
+			contatore_tempo += array_progs[i].burst_time + (array_progs[i].arrival_time - contatore_tempo);
+		}
+		else
+		{
+			std::cout<<contatore_tempo<<"\t";
+			sommatoria_waitt += contatore_tempo;
+			contatore_tempo += array_progs[i].burst_time;
+		}
+	}
+	std::cout<<"\n";
+
+	std::cout<<"Turn around time:\t"; //output turn around time
+	contatore_tempo=0; //tempo usato per esecuzione dei vari processi
+	int sommatoria_turnat=0;
+	for(int i=0; i<num_progs; i++)
+	{
+		if(array_progs[i].arrival_time > contatore_tempo) //se il processo arriva dopo che tutti i processi piÃ¹ vecchi sono finiti
+		{
+			contatore_tempo += array_progs[i].burst_time + (array_progs[i].arrival_time - contatore_tempo);
+			std::cout<<contatore_tempo<<"\t";
+			sommatoria_turnat += contatore_tempo;
+		}
+		else
+		{
+			contatore_tempo += array_progs[i].burst_time;
+			std::cout<<contatore_tempo<<"\t";
+			sommatoria_turnat += contatore_tempo;
+		}
+	}
+	std::cout<<"\n";
+
+	std::cout<<"Average wait time: "<<(((float) sommatoria_waitt)/((float) num_progs))<<"\n";		//output medie
+	std::cout<<"Average turn around time: "<<(((float) sommatoria_turnat)/((float) num_progs))<<"\n";	//
+}
+
+//appunti: (li ho lasciati perche' potrebbero rendere il programma di piu' facile lettura)
+//completio time = contatore tempo + burst
+//burst time = tempo per eseguire processo x
+//tempo attesa = waiting time = quelli di prima		(se arrival time>quelli di prima:	=quelli di prima+(arrival time-quelli di prima)
+
+/*
+exit codes:
+0: success
+1: RAM insufficiente
+*/
