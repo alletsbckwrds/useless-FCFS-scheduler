@@ -14,7 +14,7 @@ void FCFScalc(struct processes *array_progs, int num_progs); //prototipo di funz
 
 int main()
 {
-	printf("Quanti programmi vuoi inserire? ");
+	printf("Quanti processi vuoi inserire? ");
 	int num_progs;
 	scanf("%d", &num_progs);
 	
